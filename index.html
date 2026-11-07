@@ -322,13 +322,26 @@ dt{color:var(--muted);font-size:13px} dd{margin:0;overflow-wrap:anywhere;white-s
     dd.setAttribute("dir","ltr");dd.appendChild(ul);dl.appendChild(dd);
   }
   function row(dl,l,v,mono){if(!v)return;dl.appendChild(h("dt","",l));var dd=h("dd",mono?"mono":"",v);dd.setAttribute("dir","ltr");dl.appendChild(dd);}
+  /* Orthopedic rooms 224 down to 213 first; then other departments / other room names; then cases with no room. */
+  function roomKey(c){
+    var s=String(c.room||"").trim().replace(/[٠-٩]/g,function(d){return "٠١٢٣٤٥٦٧٨٩".indexOf(d);});
+    if(/^\d+$/.test(s)){var n=parseInt(s,10); if(n>=213&&n<=224) return {g:0,n:-n,s:""};}
+    return s?{g:1,n:0,s:s}:{g:2,n:0,s:""};
+  }
+  function roomOrder(a,b){
+    var x=roomKey(a),y=roomKey(b);
+    if(x.g!==y.g) return x.g-y.g;
+    if(x.n!==y.n) return x.n-y.n;
+    if(x.s!==y.s) return x.s.localeCompare(y.s,"ar",{numeric:true});
+    return (b.createdAt||0)-(a.createdAt||0);
+  }
   function visible(){
     var t=dayKey(Date.now());
     return cases.filter(function(c){
       var out=!!c.dischargedAt;
       if(filter==="out") return out;
       return !out&&(filter==="all"||c.phase===filter)&&(!todayOnly||c.day===t);
-    });
+    }).sort(roomOrder);
   }
   function addOutBtns(a,c){
     if(c.dischargedAt){
