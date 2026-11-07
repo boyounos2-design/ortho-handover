@@ -49,7 +49,12 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 .cases{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
 .case{border:1.5px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;background:var(--surface)}
 .case-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
-.case h3{margin:0;font-size:17px;overflow-wrap:anywhere}
+.case h3{margin:0;font-size:17px;overflow-wrap:anywhere;direction:rtl;text-align:right}
+.case-id{display:flex;gap:10px;align-items:flex-start;min-width:0;flex:1}
+.roombox{flex:none;min-width:44px;height:44px;padding:0 6px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;border:2px solid var(--ink);border-radius:8px;font:700 17px var(--mono);color:var(--ink);background:var(--surface-2)}
+.roombox.none{border-style:dashed;border-color:var(--line);color:var(--muted)}
+.case-id>div{min-width:0}
+.case dl.ltr{direction:ltr;text-align:left}
 .meta{font-size:13px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap}
 .pill{font:600 13px var(--mono);padding:2px 12px;border-radius:99px;flex:none}
 .pill.pre{background:var(--pre-soft);color:var(--pre)} .pill.post{background:var(--post-soft);color:var(--post)}
@@ -306,7 +311,7 @@ dt{color:var(--muted);font-size:13px} dd{margin:0;overflow-wrap:anywhere;white-s
   }
 
   /* ---------- list ---------- */
-  function row(dl,l,v,mono){if(!v)return;dl.appendChild(h("dt","",l));var dd=h("dd",mono?"mono":"",v);dd.setAttribute("dir","auto");dl.appendChild(dd);}
+  function row(dl,l,v,mono){if(!v)return;dl.appendChild(h("dt","",l));var dd=h("dd",mono?"mono":"",v);dd.setAttribute("dir","ltr");dl.appendChild(dd);}
   function visible(){
     var t=dayKey(Date.now());
     return cases.filter(function(c){
@@ -334,10 +339,11 @@ dt{color:var(--muted);font-size:13px} dd{margin:0;overflow-wrap:anywhere;white-s
       ul.appendChild(li); return;
     }
     list.forEach(function(c){
-      var li=h("li","case"),top=h("div","case-top"),left=h("div"),t=h("h3","",c.name); t.setAttribute("dir","auto"); left.appendChild(t);
+      var li=h("li","case"),top=h("div","case-top"),idw=h("div","case-id"),left=h("div"),t=h("h3","",c.name); t.setAttribute("dir","rtl"); left.appendChild(t);
+      var rb=h("div","roombox"+(c.room?"":" none"),c.room||"—"); rb.setAttribute("dir","ltr"); rb.setAttribute("aria-label","رقم الغرفة"); idw.appendChild(rb); idw.appendChild(left);
       var m=h("div","meta"); if(c.age)m.appendChild(h("span","mono",c.age+" سنة")); if(c.day)m.appendChild(h("span","mono",c.day)); if(c.by)m.appendChild(h("span","","سجّلها: "+c.by)); left.appendChild(m);
-      top.appendChild(left); if(c.phase)top.appendChild(h("span","pill "+c.phase.toLowerCase(),c.phase)); li.appendChild(top);
-      var dl=h("dl"); row(dl,"الغرفة",c.room,true); row(dl,"Diagnosis",c.diagnosis); row(dl,"Operation",c.operation); row(dl,"Chronic",c.chronic); row(dl,"Med no.",c.medNo,true); row(dl,"تحاليل",c.labs); row(dl,"ملاحظات",c.notes); li.appendChild(dl);
+      top.appendChild(idw); if(c.phase)top.appendChild(h("span","pill "+c.phase.toLowerCase(),c.phase)); li.appendChild(top);
+      var dl=h("dl","ltr"); dl.setAttribute("dir","ltr"); row(dl,"Diagnosis",c.diagnosis); row(dl,"Operation",c.operation); row(dl,"Chronic",c.chronic); row(dl,"Med no.",c.medNo,true); row(dl,"Labs",c.labs); row(dl,"Notes",c.notes); li.appendChild(dl);
       var a=h("div","row");
       var ed=h("button","btn small","تعديل"); ed.type="button"; ed.onclick=function(){edit(c);}; a.appendChild(ed);
       addOutBtns(a,c);
