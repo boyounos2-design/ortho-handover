@@ -55,6 +55,8 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 .roombox.none{border-style:dashed;border-color:var(--line);color:var(--muted)}
 .case-id>div{min-width:0}
 .case dl.ltr{direction:ltr;text-align:left}
+.nlist{margin:0;padding:0 0 0 20px;list-style:disc;display:flex;flex-direction:column;gap:3px}
+.nlist li{padding-left:2px}
 .meta{font-size:13px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap}
 .pill{font:600 13px var(--mono);padding:2px 12px;border-radius:99px;flex:none}
 .pill.pre{background:var(--pre-soft);color:var(--pre)} .pill.post{background:var(--post-soft);color:var(--post)}
@@ -115,7 +117,7 @@ dt{color:var(--muted);font-size:13px} dd{margin:0;overflow-wrap:anywhere;white-s
         <label class="f" for="f-op">Operation (العملية)<input type="text" id="f-op" dir="auto" autocomplete="off"></label>
         <label class="f" for="f-chronic">Chronic Disease<input type="text" id="f-chronic" dir="auto" autocomplete="off"></label>
         <label class="f" for="f-labs">تحاليل<input type="text" id="f-labs" dir="auto" autocomplete="off" placeholder="مثال: CBC, Echo, Coag"></label>
-        <label class="f" for="f-notes">ملاحظات<textarea id="f-notes" rows="4" dir="auto"></textarea></label>
+        <label class="f" for="f-notes">ملاحظات<textarea id="f-notes" rows="4" dir="auto" placeholder="كل سطر = نقطة مستقلة (اضغط Enter لسطر جديد)"></textarea></label>
         <div class="status" id="form-status" role="status" aria-live="polite"></div>
         <div class="row">
           <button class="btn primary" id="save" type="button">حفظ التسليم</button>
@@ -311,6 +313,14 @@ dt{color:var(--muted);font-size:13px} dd{margin:0;overflow-wrap:anywhere;white-s
   }
 
   /* ---------- list ---------- */
+  function noteRow(dl,l,v){
+    var lines=String(v||"").split(/\r?\n/).map(function(s){return s.replace(/^\s*[-•*·]+\s*/,"").trim();}).filter(Boolean);
+    if(!lines.length)return;
+    dl.appendChild(h("dt","",l));
+    var dd=h("dd","notes-dd"),ul=h("ul","nlist");
+    lines.forEach(function(s){var li=h("li","",s);li.setAttribute("dir","ltr");ul.appendChild(li);});
+    dd.setAttribute("dir","ltr");dd.appendChild(ul);dl.appendChild(dd);
+  }
   function row(dl,l,v,mono){if(!v)return;dl.appendChild(h("dt","",l));var dd=h("dd",mono?"mono":"",v);dd.setAttribute("dir","ltr");dl.appendChild(dd);}
   function visible(){
     var t=dayKey(Date.now());
@@ -343,7 +353,7 @@ dt{color:var(--muted);font-size:13px} dd{margin:0;overflow-wrap:anywhere;white-s
       var rb=h("div","roombox"+(c.room?"":" none"),c.room||"—"); rb.setAttribute("dir","ltr"); rb.setAttribute("aria-label","رقم الغرفة"); idw.appendChild(rb); idw.appendChild(left);
       var m=h("div","meta"); if(c.age)m.appendChild(h("span","mono",c.age+" سنة")); if(c.day)m.appendChild(h("span","mono",c.day)); if(c.by)m.appendChild(h("span","","سجّلها: "+c.by)); left.appendChild(m);
       top.appendChild(idw); if(c.phase)top.appendChild(h("span","pill "+c.phase.toLowerCase(),c.phase)); li.appendChild(top);
-      var dl=h("dl","ltr"); dl.setAttribute("dir","ltr"); row(dl,"Diagnosis",c.diagnosis); row(dl,"Operation",c.operation); row(dl,"Chronic",c.chronic); row(dl,"Med no.",c.medNo,true); row(dl,"Labs",c.labs); row(dl,"Notes",c.notes); li.appendChild(dl);
+      var dl=h("dl","ltr"); dl.setAttribute("dir","ltr"); row(dl,"Diagnosis",c.diagnosis); row(dl,"Operation",c.operation); row(dl,"Chronic",c.chronic); row(dl,"Med no.",c.medNo,true); row(dl,"Labs",c.labs); noteRow(dl,"Notes",c.notes); li.appendChild(dl);
       var a=h("div","row");
       var ed=h("button","btn small","تعديل"); ed.type="button"; ed.onclick=function(){edit(c);}; a.appendChild(ed);
       addOutBtns(a,c);
